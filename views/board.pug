@@ -1,0 +1,12 @@
+extends layout 
+
+block content
+    h1= title
+
+    each message in messages 
+        h3= messages.title 
+        h4= messages.text 
+        if !currentUser
+            p= 'Anonymous author'
+        else
+            p= messages.author.name

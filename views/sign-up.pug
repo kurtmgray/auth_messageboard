@@ -1,0 +1,10 @@
+extends layout 
+
+block content
+    h1= title
+        form(action="" method="POST")
+            label(for="username")= 'Username'
+            input(name="username" placeholder="username" type="text")
+            label(for="password")= 'Password'
+            input(name="password" type="password")
+            button= 'Sign Up'
