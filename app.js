@@ -1,10 +1,12 @@
 var createError = require('http-errors');
 var express = require('express');
+const session = require("express-session");
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
-const { passport } = require('../controllers/usercontroller')
+var passport = require('passport')
+//var csrf = require('csurf')
 
 require('dotenv').config()
 
@@ -18,9 +20,7 @@ var db = mongoose.connection;
 //Bind connection to error event (to get notification of connection errors)
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
 const boardRouter = require('./routes/board')
 
 var app = express();
@@ -34,13 +34,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({ secret: "cats", resave: false, saveUninitialized: true }));
+app.use(passport.authenticate('session'));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/board', boardRouter)
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -57,5 +58,20 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+app.use(function(req, res, next) {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
+app.use(function(req, res, next) {
+  res.locals.currentUser = req.user;
+  next();
+});
+
+
+
+app.use('/', indexRouter);
+app.use('/board', boardRouter)
 
 module.exports = app;

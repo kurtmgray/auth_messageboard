@@ -17,11 +17,18 @@ exports.all_messages_get = (req, res, next) => {
 }
 
 exports.message_form_get = (req, res, next) => {
-    // GET all messages, check for currentUser
+    res.render('sign-up-form', {title: 'Create New Message'})
 }
 
 exports.message_form_post = (req, res, next) => {
-    // GET all messages, check for currentUser
+    const message = new Message (
+        {
+            title: req.body.title,
+            text: req.body.text,
+            timestamp: new Date,
+            author: currentUser._id
+        }
+    )
 }
 
 

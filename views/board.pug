@@ -6,7 +6,7 @@ block content
     each message in messages 
         h3= messages.title 
         h4= messages.text 
-        if !currentUser
+        if !currentUser.memberStatus
             p= 'Anonymous author'
         else
             p= messages.author.name

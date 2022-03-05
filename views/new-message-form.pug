@@ -1,0 +1,21 @@
+extends layout 
+
+block content
+    h1= title
+
+    if !currentUser    
+        form(action="/board/log-in" method="POST")
+            div.form-group    
+                label(for="fname")= 'First Name'
+                input#first_name.form-control(name="fname" placeholder="John" type="text")
+                label(for="lname")= 'Last Name'
+                input#last_name.form-control(name="lname" placeholder="Doe" type="text")
+            div.form-group
+                label(for="username")= 'Username'
+                input#first_name.form-control(name="username" placeholder="username" type="text")
+                label(for="password")= 'Password'
+                input#first_name.form-control(name="password" placeholder="password" type="password")
+            
+            button='Sign Up'
+    else 
+        p= 'Please log in first'
