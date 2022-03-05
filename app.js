@@ -6,7 +6,9 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
 var passport = require('passport')
-//var csrf = require('csurf')
+const LocalStrategy = require("passport-local").Strategy;
+const bcrypt = require('bcryptjs')
+const User = require('./models/user')
 
 require('dotenv').config()
 
@@ -34,14 +36,46 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({ secret: "cats", resave: false, saveUninitialized: true }));
-app.use(passport.authenticate('session'));
 
+passport.use(
+  new LocalStrategy((username, password, done) => {
+      console.log('passport')
+      console.log(username)
+      User.findOne({ username: username }, (err, user) => {
+      console.log(user)
+      if (err) { 
+        return done(err);
+      }
+      if (!user) {
+        return done(null, false, { message: "Incorrect username" });
+      }
+      bcrypt.compare(password, user.password, (err, res) => {
+          if (res) {
+            return done(null, user)
+          } else {
+            return done(null, false, { message: "Incorrect password" })
+          }
+      })    
+  });
+})
+);
 
+passport.serializeUser((user, done) => done(null, user.id));
+passport.deserializeUser((id, done) => User.findById(id, (err, user) => done(err, user)));
+
+app.use(session({secret: "cats",  resave: false, saveUninitialized: true, }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(passport.authenticate('session'));
 
+app.use(function(req, res, next) {
+  console.log(req.user)
+  res.locals.currentUser = req.user;
+  next();
+});
 
+app.use('/', indexRouter);
+app.use('/board', boardRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -58,20 +92,5 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
-app.use(function(req, res, next) {
-  res.locals.csrfToken = req.csrfToken();
-  next();
-});
-
-app.use(function(req, res, next) {
-  res.locals.currentUser = req.user;
-  next();
-});
-
-
-
-app.use('/', indexRouter);
-app.use('/board', boardRouter)
 
 module.exports = app;

@@ -3,19 +3,14 @@ extends layout
 block content
     h1= title
 
-    if !currentUser    
+    if currentUser    
         form(action="/board/log-in" method="POST")
             div.form-group    
-                label(for="fname")= 'First Name'
-                input#first_name.form-control(name="fname" placeholder="John" type="text")
-                label(for="lname")= 'Last Name'
-                input#last_name.form-control(name="lname" placeholder="Doe" type="text")
-            div.form-group
-                label(for="username")= 'Username'
-                input#first_name.form-control(name="username" placeholder="username" type="text")
-                label(for="password")= 'Password'
-                input#first_name.form-control(name="password" placeholder="password" type="password")
+                label(for="title")= 'Message Title'
+                input#first_name.form-control(name="title" type="text" required="true" value=(undefined==data ? '' : data.title))
+                label(for="message")= 'Message'
+                input#last_name.form-control(name="message" type="text" required="true" value=(undefined==data ? '' : data.message))
             
-            button='Sign Up'
+            button= 'Submit Message'
     else 
         p= 'Please log in first'

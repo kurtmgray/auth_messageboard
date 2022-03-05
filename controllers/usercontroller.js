@@ -1,49 +1,33 @@
-const Message = require('../models/message')
 const User = require('../models/user')
 const passport = require("passport");
-const LocalStrategy = require("passport-local").Strategy;
-const bcrypt = require('bcryptjs')
+const { body, validationResult } = require('express-validator')
+const { currentUser } = require('../app')
 
-passport.use(
-    
-    new LocalStrategy((username, password, done) => {
-        console.log('passport')
-        User.findOne({ username: username }, (err, user) => {
-        if (err) { 
-          return done(err);
-        }
-        if (!user) {
-          return done(null, false, { message: "Incorrect username" });
-        }
-        bcrypt.compare(password, user.password, (err, res) => {
-            if (res) {
-              return done(null, user)
-            } else {
-              return done(null, false, { message: "Incorrect password" })
-            }
-        })    
-    });
-  })
-);
 
-passport.serializeUser(function(user, done) {
-  process.nextTick(() => {
-    done(null, user.id);
-  })
-});
-
-passport.deserializeUser(function(id, done) {
-  User.findById(id, function(err, user) {
-    done(err, user);
-  });
-});
 
 exports.sign_up_form_get = (req, res, next) => {
     res.render('sign-up-form', { title: 'Sign Up Form'})
 
 }
 
-exports.sign_up_form_post = (req, res, next) => {
+exports.sign_up_form_post = [
+  
+  body('fname').trim().isLength({ min: 1 }).escape().withMessage('First name must be specified.')
+    .isAlphanumeric().withMessage('First name has non-alphanumeric characters.'),
+  body('lname').trim().isLength({ min: 1 }).escape().withMessage('Last name must be specified.')
+    .isAlphanumeric().withMessage('Last name has non-alphanumeric characters.'),
+  body('username').trim().isLength({ min: 1 }).escape().withMessage('Username must be specified.')
+    .isAlphanumeric().withMessage('Username has non-alphanumeric characters.'),
+  body('password').trim().isLength({ min: 6 }).escape().withMessage('Password must be at least 6 characters.'),
+  
+(req, res, next) => {
+  
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) { 
+    res.render('sign-up-form', { title: 'Sign Up Form', errors: errors, data: req.body})
+  }
+  else {  
     const user = new User(
         {
             username: req.body.username,
@@ -63,17 +47,21 @@ exports.sign_up_form_post = (req, res, next) => {
             res.redirect('/')
         })
     });
-    
-}
+  }  
+}]
 
 exports.log_in_get = (req, res, next) => {
     res.render('log-in-form', {title: 'Log In'})
 }
 
-exports.log_in_post = (req, res, next) => {
+exports.log_in_post = 
     passport.authenticate("local", {
       successReturnToOrRedirect: '/',
       failureRedirect: '/log-in',
       failureMessage: true
-      })
+    })
+
+exports.log_out_get = (req, res, next) => {
+  req.logout()
+  res.redirect('/')
 }

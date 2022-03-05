@@ -3,10 +3,13 @@ extends layout
 block content
     h1= title
 
-    each message in messages 
-        h3= messages.title 
-        h4= messages.text 
-        if !currentUser.memberStatus
-            p= 'Anonymous author'
-        else
-            p= messages.author.name
+    if messages
+        each message in messages 
+            h3= messages.title 
+            h4= messages.text 
+            if !currentUser.memberStatus
+                p= 'Anonymous author'
+            else
+                p= messages.author.name
+    else 
+    h2= "There are no messages to display."

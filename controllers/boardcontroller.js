@@ -11,24 +11,44 @@ exports.all_messages_get = (req, res, next) => {
         }
     }, (err, results) => {
         if (err) { return next(err) }
-        res.render('board', {title: 'Message Board', messages:results.messages})
+
+        res.render('board', {title: 'Message Board', messages:results.messages, currentUser: res.locals.currentUser })
     })
     
 }
 
 exports.message_form_get = (req, res, next) => {
-    res.render('sign-up-form', {title: 'Create New Message'})
+    console.log('21' + currentUser)
+    res.render('new-message-form', {title: 'Create New Message', currentUser: res.locals.currentUser})
 }
 
-exports.message_form_post = (req, res, next) => {
-    const message = new Message (
-        {
-            title: req.body.title,
-            text: req.body.text,
-            timestamp: new Date,
-            author: currentUser._id
+exports.message_form_post = [
+    
+    body('title').trim().isLength({ min: 1 }).escape().withMessage('Title must be specified.'),
+    body('message').trim().isLength({ min: 1 }).escape().withMessage('Title must be specified.'),
+
+    (req, res, next) => {
+        
+        const errors = validationResult(req)
+        
+        if (!errors.isEmpty()) {
+            res.render('new-message-form', {title: 'Create New Message', errors: errors, data: req.body})
         }
-    )
-}
+        else {
+            const message = new Message (
+                {
+                    title: req.body.title,
+                    text: req.body.message,
+                    timestamp: new Date,
+                    author: currentUser._id
+                }
+            )
+            message.save(err => {
+                if (err) {return next(err) }
+                res.redirect('/')
+            })
+        }    
+    }
+]
 
 

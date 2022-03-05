@@ -24,6 +24,9 @@ router.post('/sign-up', usercontroller.sign_up_form_post)
 router.get('/log-in', usercontroller.log_in_get)
 
 // POST form - login
-router.post('/log-in/attempt', usercontroller.log_in_post)
+router.post('/log-in', usercontroller.log_in_post)
+
+//GET log out
+router.get('/log-out', usercontroller.log_out_get)
 
 module.exports = router
