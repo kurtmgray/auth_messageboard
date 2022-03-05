@@ -1,0 +1,13 @@
+extends layout 
+
+block content 
+    h1= title 
+
+    form(action="/board/membership/attempt" method="POST")
+            div.form-group    
+                label(for="code")= 'Enter the secret code:'
+                input#first_name.form-control(name="code" type="text" required="true")
+            button= 'Submit'
+
+    if error 
+        p= error

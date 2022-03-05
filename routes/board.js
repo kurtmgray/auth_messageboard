@@ -1,5 +1,8 @@
 const express = require('express')
 const router = express.Router()
+const User = require('../models/user')
+const Message = require('../models/message')
+
 
 const boardcontroller = require('../controllers/boardcontroller')
 const usercontroller = require('../controllers/usercontroller')
@@ -26,7 +29,13 @@ router.get('/log-in', usercontroller.log_in_get)
 // POST form - login
 router.post('/log-in', usercontroller.log_in_post)
 
-//GET log out
+// GET log out
 router.get('/log-out', usercontroller.log_out_get)
+
+// GET membership code page
+router.get('/membership', usercontroller.add_membership_get)
+
+// POST membership
+router.post('/membership/attempt', usercontroller.add_membership_post )
 
 module.exports = router

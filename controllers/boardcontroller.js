@@ -1,5 +1,4 @@
 const Message = require('../models/message')
-const User = require('../models/user')
 const async = require('async')
 const { body, validationResult } = require('express-validator')
 
@@ -8,24 +7,24 @@ exports.all_messages_get = (req, res, next) => {
     async.parallel({
         messages: (callback) => {
             Message.find().populate('author').exec(callback)
-        }
+        },
     }, (err, results) => {
         if (err) { return next(err) }
 
-        res.render('board', {title: 'Message Board', messages:results.messages, currentUser: res.locals.currentUser })
+        res.render('board', {title: 'Message Board', messages: results.messages, currentUser: res.locals.currentUser })
     })
     
 }
 
 exports.message_form_get = (req, res, next) => {
-    console.log('21' + currentUser)
+    console.log('21' + res.locals.currentUser)
     res.render('new-message-form', {title: 'Create New Message', currentUser: res.locals.currentUser})
 }
 
 exports.message_form_post = [
     
-    body('title').trim().isLength({ min: 1 }).escape().withMessage('Title must be specified.'),
-    body('message').trim().isLength({ min: 1 }).escape().withMessage('Title must be specified.'),
+    body('title').trim().isLength({ min: 1 }).withMessage('Title must be specified.'),
+    body('message').trim().isLength({ min: 1 }).withMessage('Title must be specified.'),
 
     (req, res, next) => {
         
@@ -40,7 +39,7 @@ exports.message_form_post = [
                     title: req.body.title,
                     text: req.body.message,
                     timestamp: new Date,
-                    author: currentUser._id
+                    author: res.locals.currentUser._id
                 }
             )
             message.save(err => {

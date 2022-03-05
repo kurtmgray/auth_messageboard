@@ -5,11 +5,15 @@ block content
 
     if messages
         each message in messages 
-            h3= messages.title 
-            h4= messages.text 
-            if !currentUser.memberStatus
+            h3= message.title 
+            h4= message.text 
+            if !currentUser || !currentUser.memberStatus
                 p= 'Anonymous author'
             else
-                p= messages.author.name
+                p= message.author.name
+                p= message.timestamp
     else 
-    h2= "There are no messages to display."
+        h2= "There are no messages to display."
+
+    if currentUser && !currentUser.memberStatus
+        a(href="/board/membership") Click here to gain Author access

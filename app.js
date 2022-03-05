@@ -1,31 +1,33 @@
-var createError = require('http-errors');
-var express = require('express');
-const session = require("express-session");
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var mongoose = require('mongoose');
-var passport = require('passport')
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const mongoose = require('mongoose');
+const passport = require('passport')
 const LocalStrategy = require("passport-local").Strategy;
+const session = require("express-session");
 const bcrypt = require('bcryptjs')
 const User = require('./models/user')
+const MongoStore = require('connect-mongo')
+
 
 require('dotenv').config()
 
 //Set up default mongoose connection
-var mongoDB = process.env.MONGO_URL
+const mongoDB = process.env.MONGO_URL
 mongoose.connect(mongoDB, {useNewUrlParser: true, useUnifiedTopology: true});
 
 //Get the default connection
-var db = mongoose.connection;
+const db = mongoose.connection;
 
 //Bind connection to error event (to get notification of connection errors)
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-var indexRouter = require('./routes/index');
+const indexRouter = require('./routes/index');
 const boardRouter = require('./routes/board')
 
-var app = express();
+const app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -39,10 +41,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 passport.use(
   new LocalStrategy((username, password, done) => {
-      console.log('passport')
-      console.log(username)
       User.findOne({ username: username }, (err, user) => {
-      console.log(user)
       if (err) { 
         return done(err);
       }
@@ -63,13 +62,25 @@ passport.use(
 passport.serializeUser((user, done) => done(null, user.id));
 passport.deserializeUser((id, done) => User.findById(id, (err, user) => done(err, user)));
 
-app.use(session({secret: "cats",  resave: false, saveUninitialized: true, }));
+app.use(session(
+  {
+    secret: "cats", 
+    resave: false, 
+    saveUninitialized: true,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URL,
+      collectionName: 'sessions'
+    }),
+    cookie: {
+      maxAge: 1000 * 60 * 60 *24
+    }
+  }
+));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(passport.authenticate('session'));
 
 app.use(function(req, res, next) {
-  console.log(req.user)
   res.locals.currentUser = req.user;
   next();
 });

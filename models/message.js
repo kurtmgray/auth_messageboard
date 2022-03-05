@@ -7,13 +7,13 @@ const MessageSchema = new Schema(
         title: {type: String, required: true},
         text: {type: String, required: true},
         timestamp: {type: Date},
-        author: {type: Schema.Types.ObjectId, ref: 'user'}
+        author: {type: Schema.Types.ObjectId, ref: 'User'}
     }
 )
 
 MessageSchema
 .virtual('url')
-.get(() => {
+.get(function() {
     return '/board/message/' + this._id 
 })
 

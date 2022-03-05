@@ -1,13 +1,11 @@
 const User = require('../models/user')
 const passport = require("passport");
 const { body, validationResult } = require('express-validator')
-const { currentUser } = require('../app')
-
+require('dotenv').config()
 
 
 exports.sign_up_form_get = (req, res, next) => {
     res.render('sign-up-form', { title: 'Sign Up Form'})
-
 }
 
 exports.sign_up_form_post = [
@@ -57,11 +55,36 @@ exports.log_in_get = (req, res, next) => {
 exports.log_in_post = 
     passport.authenticate("local", {
       successReturnToOrRedirect: '/',
-      failureRedirect: '/log-in',
+      failureRedirect: '/board/log-in',
       failureMessage: true
     })
 
 exports.log_out_get = (req, res, next) => {
   req.logout()
   res.redirect('/')
+}
+
+exports.add_membership_get = (req, res, next) => {
+  res.render('membership-form', {title: `Upgrade your status, ${res.locals.currentUser.fname}!`})
+}
+
+exports.add_membership_post = (req, res, next) => {
+
+  if (req.body.code === process.env.CODE) {
+    const member = new User({
+      _id: res.locals.currentUser._id,
+      fname: res.locals.currentUser.fname,
+      lname: res.locals.currentUser.lname,
+      username: res.locals.currentUser.username,
+      password: res.locals.currentUser.password,
+      memberStatus: true
+    })
+    User.findByIdAndUpdate(res.locals.currentUser._id, member, {}, (err) => {
+      if (err) { return next(err)}
+      res.redirect('/')
+    })
+  }
+  else {
+    res.render('membership-form', {title: `Upgrade your status, ${res.locals.currentUser.fname}!`, error: 'Incorrect, try again.'})
+  }
 }

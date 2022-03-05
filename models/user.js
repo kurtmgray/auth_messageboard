@@ -14,13 +14,13 @@ const UserSchema = new Schema(
 
 UserSchema
 .virtual('name')
-.get(() => {
+.get(function() {
     return this.fname + ' ' + this.lname
 })
 
 UserSchema
 .virtual('url')
-.get(() => {
+.get(function() {
     return '/users/' + this._id
 })
 

@@ -4,7 +4,7 @@ block content
     h1= title
 
     if currentUser    
-        form(action="/board/log-in" method="POST")
+        form(action="/board/new-message" method="POST")
             div.form-group    
                 label(for="title")= 'Message Title'
                 input#first_name.form-control(name="title" type="text" required="true" value=(undefined==data ? '' : data.title))
